@@ -173,20 +173,15 @@ class Tomasulo:
 			active = False
 
 			for i in range(self.instructions_unity.max_size):
-				# print(self.instructions_unity.list[i])
 				if self.instructions_unity.list[i] or self.instructions_unity.busy[i] or self.instructions_unity.state[i] == "Executing":
 					active = True
 			for i in range(self.load_store.max_size):
-				# print(self.load_store.list[i])
 				if self.load_store.size > 0 or self.load_store.executer.busy():
 					active = True
 			for i in range(self.mult.max_size):
-				# print(self.mult.list[i])
 				if self.mult.size > 0 or self.mult.executer.busy():
 					active = True
 			for i in range(self.add_sub.max_size):
-				# print(self.add_sub.list[i])
-				# if self.add_sub.list[i] or self.add_sub.busy[i] or self.add_sub.state[i] == "Executing":
 				if self.add_sub.size > 0 or self.add_sub.executer.busy():
 					active = True
 

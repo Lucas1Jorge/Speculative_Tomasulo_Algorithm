@@ -18,12 +18,12 @@ class register_bank:
 
 	def push(self, info):
 		if info[-1] == "mark":
-			if info[0] == "SW":
+			if info[0][0] == "S":
 				return
 			else:
 				if int(info[1]) != 0:
 					self.registers[int(info[1])].Qi = info[0]
-		elif info[0] == "SW":
+		elif info[0][0] == "S":
 			return
 		else:
 			if info[1] != 0 and info[0] == self.registers[int(info[1])].Qi:

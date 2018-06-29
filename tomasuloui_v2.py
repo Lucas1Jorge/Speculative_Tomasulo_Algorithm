@@ -549,6 +549,8 @@ class Ui_MainWindow(object):
 				self.robRegistersTable.setItem(1, i, item)
 			if ROB.RS_Busy[i] == True:
 				item.setText(_translate("MainWindow", str(ROB.RS_Busy[i])))
+			else:
+				item.setText(_translate("MainWindow", ""))
 
 	def set_Tomasulo(self, Tomasulo):
 		self.Tomasulo = Tomasulo

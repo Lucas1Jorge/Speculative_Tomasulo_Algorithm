@@ -5,6 +5,7 @@ class ROB(buffer):
 		super().__init__(name, max_size, list_data_bus)
 		self.destiny = [""] * max_size
 		self.value = [""] * max_size
+		self.ready = [False] * max_size
 		self.RS_Busy = ["False"] * 32
 		self.RS_reorder = [""] * 32
 		self.Tomasulo = Tomasulo
@@ -50,8 +51,9 @@ class ROB(buffer):
 			else:
 				self.state[self.end] = "Consolidating"
 
-			if len(info) > 0:
+			if len(info) > 0 and info[0][0] != "S":
 				self.destiny[self.end] = info[1]
+				self.RS_Busy[int(self.destiny[self.end])] = True
 				self.value[self.end] = info[-1]
 			
 			self.end = (self.end + 1) % self.max_size
@@ -63,36 +65,39 @@ class ROB(buffer):
 			self.busy[self.start] = False
 			self.list[self.start].clear()
 			self.state[self.start] = ""
-			self.destiny[self.start] = ""
 			self.value[self.start] = ""
-			self.RS_Busy[self.start] = False
-			self.RS_reorder[self.start] = ""
+			self.ready[self.start] = False
+			if self.destiny[self.start]:
+				self.RS_Busy[int(self.destiny[self.start])] = False
+				self.RS_reorder[int(self.destiny[self.start])] = ""
+			self.destiny[self.start] = ""
 			self.start = (self.start + 1) % self.max_size
 			self.size -= 1
 			return ans
 
 	def clock(self, register_bank):
-		if self.top() and ((self.top()[0] == "BEQ") or (self.top()[0] == "BNE") or (self.top()[0] == "BLE")):
-			print("#####################################################")
+		if self.top() and len(self.top()) > 0 and self.top()[-1] == "mark":
+			self.Tomasulo.register_bank.push(copy_list(self.top()))
+			self.pop()
 
+		if self.top() and ((self.top()[0] == "BEQ") or (self.top()[0] == "BNE") or (self.top()[0] == "BLE")):
 			if str.isnumeric(self.top()[1]) and str.isnumeric(self.top()[2]):
 				prediction = True
 				if self.top()[0] == "BEQ":
 					if self.top()[1] == self.top()[2]:
 						self.Tomasulo.PC += int(self.top()[3])
-					else:
+					# else:
 						prediction = False
 				if self.top()[0] == "BNE":
 					if self.top()[1] != self.top()[2]:
 						self.Tomasulo.PC += int(self.top()[3])
-					else:
+					# else:
 						prediction = False
 				if self.top()[0] == "BLE":
 					if self.top()[1] <= self.top()[2]:
 						self.Tomasulo.PC = int(self.top()[3])
-					else:
+					# else:
 						prediction = False
-				self.pop()
 
 				if prediction == False:
 					for i in range(self.max_size):
@@ -102,24 +107,33 @@ class ROB(buffer):
 							self.state[i] = ""
 							self.destiny[i] = ""
 							self.value[i] = ""
-							self.RS_Busy[i] = False
-							self.RS_reorder[i] = ""
 							self.start = 0
 							self.size = 0
+					for i in range(32):
+						self.RS_Busy[i] = False
+						self.RS_reorder[i] = ""
+
+				self.pop()
 
 		else:
 			if not self.empty():
-				instruction = copy_list(self.list[self.start])
+				instruction = copy_list(self.top())
 
-				if instruction[0] == "SW":
-					pass
-
+				if instruction[0][0] == "S":
+					address = int(instruction[2]) + int(instruction[3])
+					self.Tomasulo.memory[address] = instruction[1]
+					self.Tomasulo.recently_used_memory.push([address, self.Tomasulo.memory[address]])
+					self.pop()
 				else:
-					register_bank.registers[int(self.destiny[self.start])].Vi = self.value[self.start]
-					register_bank.registers[int(self.destiny[self.start])].Qi = ""
+					register_bank.push(instruction)
+					# register_bank.registers[int(self.destiny[self.start])].Vi = self.value[self.start]
+					# register_bank.registers[int(self.destiny[self.start])].Qi = ""
 					self.pop()
 
-				# register_bank.push(instruction)
+				if instruction[0][0] == "L":
+					address = int(instruction[2]) + int(instruction[3])
+					self.Tomasulo.recently_used_memory.push([address, self.Tomasulo.memory[address]])
+
 				# for i in range(len(self.list_data_bus)):
 				# 	self.list_data_bus[i].send(instruction)
 

@@ -67,12 +67,13 @@ class loader(executer):
 	def get_result(self, register_bank):
 		if self.instruction[0] == "LW":
 			address = int(self.instruction[2]) + int(self.instruction[3])
-			self.Tomasulo.recently_used_memory.push([address, self.Tomasulo.memory[address]])
+			# self.Tomasulo.recently_used_memory.push([address, self.Tomasulo.memory[address]])
 			return self.Tomasulo.memory[address]
 		elif self.instruction[0] == "SW":
-			address = int(self.instruction[2]) + int(self.instruction[3])
-			self.Tomasulo.memory[address] = self.instruction[1]
-			self.Tomasulo.recently_used_memory.push([address, self.Tomasulo.memory[address]])
+			# address = int(self.instruction[2]) + int(self.instruction[3])
+			# self.Tomasulo.memory[address] = self.instruction[1]
+			# self.Tomasulo.recently_used_memory.push([address, self.Tomasulo.memory[address]])
+			return self.instruction[1]
 
 	def execute(self, instruction, ID):
 		self.instruction = instruction
@@ -89,13 +90,13 @@ class loader(executer):
 				if self.all_data_bus_available():
 					instruction = copy_list(self.instruction)
 
+					instruction[-1] = str(self.get_result(register_bank))
 					if instruction[0] == "LW":
-						for i in range(len(self.list_data_bus)):
-							instruction[-1] = str(self.get_result(register_bank))
-							instruction[0] = self.ID
-							self.list_data_bus[i].send(instruction)
+						instruction[0] = self.ID
 					elif instruction[0] == "SW":
-						self.get_result(register_bank)
+						instruction[0] = "S" + self.ID[1:]
+					for i in range(len(self.list_data_bus)):
+						self.list_data_bus[i].send(instruction)
 
 					self.pop()
 
