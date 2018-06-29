@@ -73,9 +73,18 @@ class instructions_unity(buffer):
 						if int(self.Vj[self.start]) <= int(self.Vk[self.start]):
 							self.Tomasulo.PC = int(self.top()[3])
 					self.pop()
-				else:
-					pass
+				# else:
+				# 	if len(self.Qj[self.start]) > 0:
+				# 		self.top()[1] = self.Qj[self.start]
+				# 	else:
+				# 		self.top()[1] = self.Vj[self.start]
+				# 	if len(self.Qk[self.start]) > 0:
+				# 		self.top()[2] = self.Qk[self.start]
+				# 	else:
+				# 		self.top()[2] = self.Vk[self.start]
+
 					# self.Tomasulo.ROB.push(copy_list(self.top()))
+					# self.pop()
 
 			elif self.top() and (self.top()[0] == "ADD" or self.top()[0] == "ADDI" or self.top()[0] == "SUB" or self.top()[0] == "MUL"):
 				if not self.Tomasulo.ROB.busy[int(self.top()[2])]:

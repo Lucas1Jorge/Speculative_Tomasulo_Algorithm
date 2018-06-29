@@ -22,42 +22,30 @@ class ROB(buffer):
 						for j in range(1, len(self.list[i])):
 							if self.list[i][j] == info[0]:
 								self.list[i][j] = info[-1]
-					# if self.list[i][0] == "BEQ" or self.list[i][0] == "BNE" or self.list[i][0] == "BLE":
-					# 	if self.list[i][1] == info[0]:
-					# 		self.list[i][1] = info[-1]
-					# 	if self.list[i][2] == info[0]:
-					# 		self.list[i][2] = info[-1]
+							if self.list[i][0] == info[0]:
+									self.list[i] = info
+				# for i in range(self.Tomasulo.instructions_unity.max_size):
+				# 	if len(self.Tomasulo.instructions_unity.list[i]) > 0:
+				# 		for j in range(1, len(self.Tomasulo.instructions_unity.list[i])):
+				# 			if self.Tomasulo.instructions_unity.list[i][j] == info[0]:
+				# 				self.Tomasulo.instructions_unity.list[i][j] = info[-1]
 
-					# elif self.list[i][0] == "SW":
+			if len(info) > 0:
+				while len(self.list[self.end]) > 0: self.end = (self.end + 1) % self.max_size
+				self.list[self.end] = info
 
-					# if self.receivers[i].Qj[pos] == info[0]:
-					# 	self.receivers[i].Qj[pos] = ""
-					# 	self.receivers[i].Vj[pos] = info[-1]
-					# 	if self.receivers[i].list[pos][0] == "SW":
-					# 		self.receivers[i].list[pos][1] = info[-1]
-					# 	else:
-					# 		self.receivers[i].list[pos][2] = info[-1]
-					# if self.receivers[i].Qk[pos] == info[0]:
-					# 	self.receivers[i].Qk[pos] = ""
-					# 	self.receivers[i].Vk[pos] = info[-1]
-					# 	self.receivers[i].list[pos][3] = info[-1]
+				if not self.empty() and (self.top()[0] == "BEQ" or self.top()[0] == "BNE" or self.top()[0] == "BLE") and info[-1] == "mark":
+					self.state[self.end] = "Writing"
+				else:
+					self.state[self.end] = "Consolidating"
 
-
-			while len(self.list[self.end]) > 0: self.end = (self.end + 1) % self.max_size
-			self.list[self.end] = info
-
-			if not self.empty() and (self.top()[0] == "BEQ" or self.top()[0] == "BNE" or self.top()[0] == "BLE") and info[-1] == "mark":
-				self.state[self.end] = "Writing"
-			else:
-				self.state[self.end] = "Consolidating"
-
-			if len(info) > 0 and info[0][0] != "S":
-				self.destiny[self.end] = info[1]
-				self.RS_Busy[int(self.destiny[self.end])] = True
-				self.value[self.end] = info[-1]
-			
-			self.end = (self.end + 1) % self.max_size
-			self.size += 1
+				if len(info) > 0 and info[0][0] != "S":
+					self.destiny[self.end] = info[1]
+					self.RS_Busy[int(self.destiny[self.end])] = True
+					self.value[self.end] = info[-1]
+				
+				self.end = (self.end + 1) % self.max_size
+				self.size += 1
 
 	def pop(self):
 		if self.size > 0:
@@ -123,12 +111,43 @@ class ROB(buffer):
 					address = int(instruction[2]) + int(instruction[3])
 					self.Tomasulo.memory[address] = instruction[1]
 					self.Tomasulo.recently_used_memory.push([address, self.Tomasulo.memory[address]])
-					self.pop()
 				else:
 					register_bank.push(instruction)
 					# register_bank.registers[int(self.destiny[self.start])].Vi = self.value[self.start]
 					# register_bank.registers[int(self.destiny[self.start])].Qi = ""
-					self.pop()
+				
+				for i in range(self.Tomasulo.load_store.max_size):
+					for j in range(1,3):
+						if self.Tomasulo.load_store.list[i] and self.Tomasulo.load_store.list[i][j] == instruction[0]:
+							self.Tomasulo.load_store.list[i][j] = instruction[-1]
+							if j == 1 or j == 2:
+								self.Tomasulo.load_store.Vj[i] = instruction[-1]
+								self.Tomasulo.load_store.Qj[i] = ""
+							if j == 3:
+								self.Tomasulo.load_store.Vk[i] = instruction[-1]
+								self.Tomasulo.load_store.Qk[i] = ""
+				for i in range(self.Tomasulo.add_sub.max_size):
+					for j in range(1,3):
+						if self.Tomasulo.add_sub.list[i] and self.Tomasulo.add_sub.list[i][j] == instruction[0]:
+							self.Tomasulo.add_sub.list[i][j] = instruction[-1]
+							if j == 1 or j == 2:
+								self.Tomasulo.add_sub.Vj[i] = instruction[-1]
+								self.Tomasulo.add_sub.Qj[i] = ""
+							if j == 3:
+								self.Tomasulo.add_sub.Vk[i] = instruction[-1]
+								self.Tomasulo.add_sub.Qk[i] = ""
+				for i in range(self.Tomasulo.mult.max_size):
+					for j in range(1,3):
+						if self.Tomasulo.mult.list[i] and self.Tomasulo.mult.list[i][j] == instruction[0]:
+							self.Tomasulo.mult.list[i][j] = instruction[-1]
+							if j == 1 or j == 2:
+								self.Tomasulo.mult.Vj[i] = instruction[-1]
+								self.Tomasulo.mult.Qj[i] = ""
+							if j == 3:
+								self.Tomasulo.mult.Vk[i] = instruction[-1]
+								self.Tomasulo.mult.Qk[i] = ""
+
+				self.pop()
 
 				if instruction[0][0] == "L":
 					address = int(instruction[2]) + int(instruction[3])
