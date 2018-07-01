@@ -26,6 +26,9 @@ class register_bank:
 		elif info[0][0] == "S":
 			return
 		else:
-			if info[1] != 0 and info[0] == self.registers[int(info[1])].Qi:
+			# if info[1] != 0 and info[0] == self.registers[int(info[1])].Qi:
+			# 	self.registers[int(info[1])].Vi = int(info[-1])
+			# 	self.registers[int(info[1])].Qi = ""
+			if info[1] != "0":
 				self.registers[int(info[1])].Vi = int(info[-1])
 				self.registers[int(info[1])].Qi = ""

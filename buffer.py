@@ -123,7 +123,7 @@ class load_store(buffer):
 		for i in range(self.max_size):
 			print(self.ID[i], self.name, self.busy[i], self.list[i], self.state[i], self.Vj[i], self.Vk[i], self.Qj[i], self.Qk[i], self.executer.cycles, self.size)
 
-	def clock(self, register_bank):
+	def clock(self, register_bank, Tomasulo):
 		if not self.executer.busy() and self.busy[self.start] == 1:
 			self.busy[self.start] = False
 			self.state[self.start] = ""
@@ -132,6 +132,13 @@ class load_store(buffer):
 
 		if not self.executer.busy() and self.top():
 			if len(self.Qj[self.start]) == 0 and len(self.Qk[self.start]) == 0:
+				if self.top()[0] == "LW":
+					for i in range(Tomasulo.ROB.max_size):
+						if Tomasulo.ROB.list[i] and Tomasulo.ROB.list[i][0][0] == "S":
+							# input()
+							if Tomasulo.ROB.Ready(i):
+								input()
+
 				self.executer.execute(self.top(), self.ID[self.start])
 				self.busy[self.start] = True
 				self.state[self.start] = "Executing"

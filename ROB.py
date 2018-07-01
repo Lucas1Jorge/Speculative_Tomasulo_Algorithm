@@ -52,7 +52,7 @@ class ROB(buffer):
 					self.RS_Busy[int(self.destiny[self.end])] = True
 					self.RS_reorder[int(info[1])] = str(self.end)
 				print("mark:", info)
-				self.Tomasulo.register_bank.push(info)
+				# self.Tomasulo.register_bank.push(info)
 
 				self.end = (self.end + 1) % self.max_size
 				self.size += 1
@@ -62,38 +62,45 @@ class ROB(buffer):
 				found = False
 				for i in range(self.max_size):
 					if len(self.list[i]) > 0:
-						for j in range(1, len(self.list[i])):
-							if self.list[i][j] == info[0]:
-								self.list[i][j] = info[-1]
-							self.ready[i] = True
-						if self.list[i][0] == info[0]:
-							self.list[i] = info
+						if self.list[i][0] == info[0] and self.list[i][-1] == "mark":
+							self.list[i] = copy_list(info)
 							found = True
 							self.state[i] = "Consolidating"
 							self.ready[i] = True
+						# for j in range(1, len(self.list[i])):
+						# 	if self.list[i][j] == info[0]:
+						# 		self.list[i][j] = info[-1]
+						# 	self.ready[i] = True
+				if found:
+					for i in range(self.max_size):
+						if len(self.list[i]) > 0:
+							for j in range(1, len(self.list[i])):
+								if self.list[i][j] == info[0]:
+									self.list[i][j] = info[-1]
+								self.ready[i] = True
 					# for i in range(self.Tomasulo.instructions_unity.max_size):
 					# 	if len(self.Tomasulo.instructions_unity.list[i]) > 0:
 					# 		for j in range(1, len(self.Tomasulo.instructions_unity.list[i])):
 					# 			if self.Tomasulo.instructions_unity.list[i][j] == info[0]:
 					# 				self.Tomasulo.instructions_unity.list[i][j] = info[-1]
 
-				if not found:
-					while len(self.list[self.end]) > 0: self.end = (self.end + 1) % self.max_size
-					self.list[self.end] = info
+				# if not found:
+				# 	while len(self.list[self.end]) > 0: self.end = (self.end + 1) % self.max_size
+				# 	self.list[self.end] = info
 
-					if not self.empty() and (self.top()[0] == "BEQ" or self.top()[0] == "BNE" or self.top()[0] == "BLE") and info[-1] == "mark":
-						self.state[self.end] = "Writing"
-					else:
-						self.state[self.end] = "Consolidating"
+				# 	if not self.empty() and (self.top()[0] == "BEQ" or self.top()[0] == "BNE" or self.top()[0] == "BLE") and info[-1] == "mark":
+				# 		self.state[self.end] = "Writing"
+				# 	else:
+				# 		self.state[self.end] = "Consolidating"
 
-					if len(info) > 0 and info[0][0] != "S":
-						self.destiny[self.end] = info[1]
-						self.RS_Busy[int(self.destiny[self.end])] = True
-						self.value[self.end] = info[-1]
-						self.ready[self.end] = False
+				# 	if len(info) > 0 and info[0][0] != "S":
+				# 		self.destiny[self.end] = info[1]
+				# 		self.RS_Busy[int(self.destiny[self.end])] = True
+				# 		self.value[self.end] = info[-1]
+				# 		self.ready[self.end] = False
 					
-					self.end = (self.end + 1) % self.max_size
-					self.size += 1
+				# 	self.end = (self.end + 1) % self.max_size
+				# 	self.size += 1
 				print("ready:", info, "found:", found, "state", self.state[self.end - 1])
 
 	def Ready(self, pos):
@@ -120,47 +127,42 @@ class ROB(buffer):
 			self.value[self.start] = ""
 			self.ready[self.start] = False
 			if self.destiny[self.start]:
-				self.RS_Busy[int(self.destiny[self.start])] = False
-				self.RS_reorder[int(self.destiny[self.start])] = ""
+				if int(self.RS_reorder[int(self.destiny[self.start])]) == int(self.start):
+					# print("a:", self.RS_reorder[int(self.destiny[self.start])], "b:", self.start)
+					self.RS_Busy[int(self.destiny[self.start])] = False
+					self.RS_reorder[int(self.destiny[self.start])] = ""
 			self.destiny[self.start] = ""
 			self.start = (self.start + 1) % self.max_size
 			self.size -= 1
 			return ans
 
 	def clock(self, register_bank):
-		# if self.top() and len(self.top()) > 0 and self.top()[-1] == "mark":
-			# self.Tomasulo.register_bank.push(copy_list(self.top()))
-			# self.pop()
-
 		if self.top() and ((self.top()[0] == "BEQ") or (self.top()[0] == "BNE") or (self.top()[0] == "BLE")):
 			if str.isnumeric(self.top()[1]) and str.isnumeric(self.top()[2]):
 				prediction = True
 				if self.top()[0] == "BEQ":
 					if self.top()[1] == self.top()[2]:
 						self.Tomasulo.PC += int(self.top()[3])
-					# else:
 						prediction = False
 				if self.top()[0] == "BNE":
 					if self.top()[1] != self.top()[2]:
 						self.Tomasulo.PC += int(self.top()[3])
-					# else:
 						prediction = False
 				if self.top()[0] == "BLE":
-					if self.top()[1] <= self.top()[2]:
+					if int(self.top()[1]) <= int(self.top()[2]):
 						self.Tomasulo.PC = int(self.top()[3])
-					# else:
 						prediction = False
 
 				if prediction == False:
 					for i in range(self.max_size):
-						if self.state[i] != "Consolidating":
-							self.busy[i] = False
-							self.list[i].clear()
-							self.state[i] = ""
-							self.destiny[i] = ""
-							self.value[i] = ""
-							self.start = 0
-							self.size = 0
+						# if self.state[i] != "Consolidating":
+						self.busy[i] = False
+						self.list[i].clear()
+						self.state[i] = ""
+						self.destiny[i] = ""
+						self.value[i] = ""
+						self.start = 0
+						self.size = 0
 					for i in range(32):
 						self.RS_Busy[i] = False
 						self.RS_reorder[i] = ""
@@ -179,9 +181,15 @@ class ROB(buffer):
 					address = int(instruction[2]) + int(instruction[3])
 					self.Tomasulo.memory[address] = instruction[1]
 					self.Tomasulo.recently_used_memory.push([address, self.Tomasulo.memory[address]])
+
 				else:
-					register_bank.push(instruction)
-					# register_bank.registers[int(self.destiny[self.start])].Vi = self.value[self.start]
+					if instruction[0][0] == "L":
+						address = int(instruction[2]) + int(instruction[3])
+						instruction[-1] = self.Tomasulo.memory[address]
+						self.Tomasulo.recently_used_memory.push([address, self.Tomasulo.memory[address]])
+					
+					self.Tomasulo.register_bank.push(instruction)
+					# register_bank.registers[int(self.destiny[self.start])].Vi = self.Value(self.start)
 					# register_bank.registers[int(self.destiny[self.start])].Qi = ""
 				
 				for i in range(self.Tomasulo.load_store.max_size):
@@ -217,14 +225,6 @@ class ROB(buffer):
 
 				self.pop()
 
-				if instruction[0][0] == "L":
-					address = int(instruction[2]) + int(instruction[3])
-					self.Tomasulo.recently_used_memory.push([address, self.Tomasulo.memory[address]])
-
-				# for i in range(len(self.list_data_bus)):
-				# 	self.list_data_bus[i].send(instruction)
-
-				# self.pop()
 
 				# global concluded_instructions
 				# Tomasulo.concluded_instructions += 1

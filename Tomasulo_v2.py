@@ -112,7 +112,7 @@ class Tomasulo:
 			self.CPI = round(self.clocks/self.concluded_instructions, 3)
 			print("CPI:", self.CPI)
 		self.clocks += 1
-
+		# if self.clocks == 120: input()
 		if (not self.instructions_unity.full()) and (int(self.PC / 4) < len(self.instructions)):
 			# if instructions[int(PC / 4)][0] == "P":
 			# 	labels[instructions[int(PC / 4)][1]] = PC
@@ -135,7 +135,7 @@ class Tomasulo:
 		print()
 
 		self.instructions_unity.clock(self.register_bank)
-		self.load_store.clock(self.register_bank)
+		self.load_store.clock(self.register_bank, self)
 		self.mult.clock(self.register_bank)
 		self.add_sub.clock(self.register_bank)
 		# self.ROB.clock(self.register_bank)
@@ -183,6 +183,10 @@ class Tomasulo:
 					active = True
 			for i in range(self.add_sub.max_size):
 				if self.add_sub.size > 0 or self.add_sub.executer.busy():
+					active = True
+
+			for i in range(self.ROB.max_size):
+				if self.ROB.size > 0:
 					active = True
 
 			if not active: return False

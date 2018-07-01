@@ -35,31 +35,26 @@ class instructions_unity(buffer):
 
 			if self.top() and ((self.top()[0] == "BEQ") or (self.top()[0] == "BNE") or (self.top()[0] == "BLE")):
 				if not self.Tomasulo.ROB.RS_Busy[int(self.top()[1])]:
-					print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& 1")
 					if len(register_bank.registers[int(self.top()[1])].Qi) == 0:
 						self.Vj[self.start] = register_bank.registers[int(self.top()[1])].Vi
 						self.Qj[self.start] = ""
 					else:
 						self.Qj[self.start] = register_bank.registers[int(self.top()[1])].Qi
 				else:
-					print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& 2")
 					h = int(self.Tomasulo.ROB.RS_reorder[int(self.top()[1])])
 					if self.Tomasulo.ROB.Ready(h):
-						print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& 2.5")
 						self.Vj[self.start] = self.Tomasulo.ROB.Value(h)
 						self.Qj[self.start] = ""
 					else:
 						self.Qj[self.start] = self.Tomasulo.ROB.list[h][0]
 
 				if not self.Tomasulo.ROB.RS_Busy[int(self.top()[2])]:
-					print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& 3")
 					if len(register_bank.registers[int(self.top()[2])].Qi) == 0:
 						self.Vk[self.start] = register_bank.registers[int(self.top()[2])].Vi
 						self.Qk[self.start] = ""
 					else:
 						self.Qk[self.start] = register_bank.registers[int(self.top()[2])].Qi
 				else:
-					print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& 4")
 					h = int(self.Tomasulo.ROB.RS_reorder[int(self.top()[2])])
 					if self.Tomasulo.ROB.Ready(h):
 						self.Vj[self.start] = self.Tomasulo.ROB.Value(h)
@@ -80,18 +75,18 @@ class instructions_unity(buffer):
 						if int(self.Vj[self.start]) <= int(self.Vk[self.start]):
 							self.Tomasulo.PC = int(self.top()[3])
 					self.pop()
-				# else:
-				# 	if len(self.Qj[self.start]) > 0:
-				# 		self.top()[1] = self.Qj[self.start]
-				# 	else:
-				# 		self.top()[1] = self.Vj[self.start]
-				# 	if len(self.Qk[self.start]) > 0:
-				# 		self.top()[2] = self.Qk[self.start]
-				# 	else:
-				# 		self.top()[2] = self.Vk[self.start]
+				else:
+					if len(self.Qj[self.start]) > 0:
+						self.top()[1] = self.Qj[self.start]
+					else:
+						self.top()[1] = str(self.Vj[self.start])
+					if len(self.Qk[self.start]) > 0:
+						self.top()[2] = self.Qk[self.start]
+					else:
+						self.top()[2] = str(self.Vk[self.start])
 
-				# 	self.Tomasulo.ROB.push(copy_list(self.top()))
-				# 	self.pop()
+					self.Tomasulo.ROB.push(copy_list(self.top()))
+					self.pop()
 
 			elif self.top() and (self.top()[0] == "ADD" or self.top()[0] == "ADDI" or self.top()[0] == "SUB" or self.top()[0] == "MUL"):
 				if not self.Tomasulo.ROB.RS_Busy[int(self.top()[2])]:
@@ -104,11 +99,9 @@ class instructions_unity(buffer):
 					h = int(self.Tomasulo.ROB.RS_reorder[int(self.top()[2])])
 					if self.Tomasulo.ROB.Ready(h):
 						self.Vj[self.start] = self.Tomasulo.ROB.Value(h)
-						print("Ready Ready Ready Ready Ready Ready Ready Ready Ready Ready")
 						self.Qj[self.start] = ""
 					else:
 						self.Qj[self.start] = self.Tomasulo.ROB.list[h][0]
-						print("Ready Ready Ready Ready Ready Ready Ready Ready Ready Ready LOL")
 
 				if self.top()[0] == "ADD" or self.top()[0] == "SUB" or self.top()[0] == "MUL" or self.top()[0] == "LW" or self.top()[0] == "SW":
 					if not self.Tomasulo.ROB.RS_Busy[int(self.top()[3])]:
