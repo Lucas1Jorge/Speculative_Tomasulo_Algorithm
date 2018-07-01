@@ -9,16 +9,18 @@ class ROB(buffer):
 		self.RS_Busy = [False] * 32
 		self.RS_reorder = [""] * 32
 		self.Tomasulo = Tomasulo
+		self.PC = [""] * max_size
 
 	def print(self):
 		for i in range(self.max_size):
-			print(self.ID[i], self.name, self.busy[i], self.list[i], self.state[i], self.destiny[i], self.value[i], self.size, "empty:", self.empty())
+			print(self.ID[i], self.name, self.busy[i], self.list[i], self.state[i], self.destiny[i], self.value[i], self.size, "PC:", self.PC[i])
 
 	def push(self, info):
 		if not self.full():
 			if info[0] == "BEQ" or info[0] == "BLE" or info[0] == "BNE":
 				while len(self.list[self.end]) > 0: self.end = (self.end + 1) % self.max_size
 				self.list[self.end] = info
+				self.PC[self.end] = str(self.Tomasulo.PC)
 
 				self.end = (self.end + 1) % self.max_size
 				self.size += 1
@@ -28,23 +30,6 @@ class ROB(buffer):
 				self.list[self.end] = info
 				self.state[self.end] = "Not Ready"
 
-				# if not self.empty() and (self.top()[0] == "BEQ" or self.top()[0] == "BNE" or self.top()[0] == "BLE") and info[-1] == "mark":
-				# 	self.state[self.end] = "Writing"
-				# else:
-				# 	self.state[self.end] = "Consolidating"
-
-				# if len(info) > 0 and info[0][0] != "S":
-				# 	self.destiny[self.end] = info[1]
-				# 	self.ready[self.end] = False
-				# 	self.RS_Busy[int(self.destiny[self.end])] = True
-				# 	# self.Tomasulo.ROB.RS_reorder[int(info[1])] = 
-				# 	self.value[self.end] = info[-1]
-				
-				# self.end = (self.end + 1) % self.max_size
-				# self.size += 1
-
-				# self.end = (self.end + 1) % self.max_size
-				# self.size += 1
 				self.ready[self.end] = False
 				self.busy[self.end] = True
 				if info[0][0] != "S":
@@ -56,7 +41,6 @@ class ROB(buffer):
 
 				self.end = (self.end + 1) % self.max_size
 				self.size += 1
-				# self.pop()
 
 			elif len(info) > 0:
 				found = False
@@ -67,10 +51,7 @@ class ROB(buffer):
 							found = True
 							self.state[i] = "Consolidating"
 							self.ready[i] = True
-						# for j in range(1, len(self.list[i])):
-						# 	if self.list[i][j] == info[0]:
-						# 		self.list[i][j] = info[-1]
-						# 	self.ready[i] = True
+
 				if found:
 					for i in range(self.max_size):
 						if len(self.list[i]) > 0:
@@ -78,30 +59,6 @@ class ROB(buffer):
 								if self.list[i][j] == info[0]:
 									self.list[i][j] = info[-1]
 								self.ready[i] = True
-					# for i in range(self.Tomasulo.instructions_unity.max_size):
-					# 	if len(self.Tomasulo.instructions_unity.list[i]) > 0:
-					# 		for j in range(1, len(self.Tomasulo.instructions_unity.list[i])):
-					# 			if self.Tomasulo.instructions_unity.list[i][j] == info[0]:
-					# 				self.Tomasulo.instructions_unity.list[i][j] = info[-1]
-
-				# if not found:
-				# 	while len(self.list[self.end]) > 0: self.end = (self.end + 1) % self.max_size
-				# 	self.list[self.end] = info
-
-				# 	if not self.empty() and (self.top()[0] == "BEQ" or self.top()[0] == "BNE" or self.top()[0] == "BLE") and info[-1] == "mark":
-				# 		self.state[self.end] = "Writing"
-				# 	else:
-				# 		self.state[self.end] = "Consolidating"
-
-				# 	if len(info) > 0 and info[0][0] != "S":
-				# 		self.destiny[self.end] = info[1]
-				# 		self.RS_Busy[int(self.destiny[self.end])] = True
-				# 		self.value[self.end] = info[-1]
-				# 		self.ready[self.end] = False
-					
-				# 	self.end = (self.end + 1) % self.max_size
-				# 	self.size += 1
-				print("ready:", info, "found:", found, "state", self.state[self.end - 1])
 
 	def Ready(self, pos):
 		if len(self.list[pos]) == 0:
@@ -125,6 +82,7 @@ class ROB(buffer):
 			self.list[self.start].clear()
 			self.state[self.start] = ""
 			self.value[self.start] = ""
+			self.PC[self.start] = ""
 			self.ready[self.start] = False
 			if self.destiny[self.start]:
 				if int(self.RS_reorder[int(self.destiny[self.start])]) == int(self.start):
@@ -139,38 +97,62 @@ class ROB(buffer):
 	def clock(self, register_bank):
 		if self.top() and ((self.top()[0] == "BEQ") or (self.top()[0] == "BNE") or (self.top()[0] == "BLE")):
 			if str.isnumeric(self.top()[1]) and str.isnumeric(self.top()[2]):
-				prediction = True
+				jumping = "not"
+				PC = 0
 				if self.top()[0] == "BEQ":
 					if self.top()[1] == self.top()[2]:
-						self.Tomasulo.PC += int(self.top()[3])
-						prediction = False
+						PC = int(self.PC[self.start]) + int(self.top()[3])
+						jumping = "jump"
 				if self.top()[0] == "BNE":
 					if self.top()[1] != self.top()[2]:
-						self.Tomasulo.PC += int(self.top()[3])
-						prediction = False
+						PC = int(self.PC[self.start]) + int(self.top()[3])
+						jumping = "jump"
 				if self.top()[0] == "BLE":
 					if int(self.top()[1]) <= int(self.top()[2]):
-						self.Tomasulo.PC = int(self.top()[3])
-						prediction = False
+						PC = int(self.top()[3])
+						jumping = "jump"
 
-				if prediction == False:
-					for i in range(self.max_size):
-						# if self.state[i] != "Consolidating":
-						self.busy[i] = False
-						self.list[i].clear()
-						self.state[i] = ""
-						self.destiny[i] = ""
-						self.value[i] = ""
-						self.start = 0
-						self.size = 0
-					for i in range(32):
-						self.RS_Busy[i] = False
-						self.RS_reorder[i] = ""
+				if jumping == "jump":
+					if not str(self.PC[self.start]) in self.Tomasulo.destiny_buffer.list or \
+					jumping != self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][1] or \
+					self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][0] != PC:
+						self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])] = [str(PC), "jump"]
+						self.Tomasulo.PC = PC
+						for i in range(self.max_size):
+							self.busy[i] = False
+							self.list[i].clear()
+							self.state[i] = ""
+							self.destiny[i] = ""
+							self.value[i] = ""
+							self.PC[i] = ""
+							self.start = 0
+							self.size = 0
+						for i in range(32):
+							self.RS_Busy[i] = False
+							self.RS_reorder[i] = ""
+				# elif jumping == "not":
+				# 	if str(self.PC[self.start]) in self.Tomasulo.destiny_buffer.list and \
+				# 	jumping != self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][1]:
+				# 		print(jumping)
+				# 		print(self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][1])
+				# 		self.Tomasulo.PC = int(self.PC[self.start])
+				# 		del self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])]
+				# 		for i in range(self.max_size):
+				# 			self.busy[i] = False
+				# 			self.list[i].clear()
+				# 			self.state[i] = ""
+				# 			self.destiny[i] = ""
+				# 			self.value[i] = ""
+				# 			self.PC[i] = ""
+				# 			self.start = 0
+				# 			self.size = 0
+				# 		for i in range(32):
+				# 			self.RS_Busy[i] = False
+				# 			self.RS_reorder[i] = ""
 
 				self.pop()
 
 		elif not self.empty() and not self.Ready(self.start):
-			print("NOT READY NOT READY NOT READY NOT READY NOT READY ")
 			return
 
 		else:

@@ -7,9 +7,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from buffer import *
 from executer import *
 from functions import *
-from memory import *
+from memories import *
 from data_bus import *
-from register import *
 from instructions_unity import *
 from ROB import *
 
@@ -23,6 +22,7 @@ class Tomasulo:
 		self.PC = 0
 		self.concluded_instructions = 0
 		self.recently_used_memory = recently_used_memory()
+		self.destiny_buffer = destiny_buffer("destiny_buffer", 4)
 		self.labels = {}
 
 		self.app = QtWidgets.QApplication(sys.argv)
@@ -103,6 +103,9 @@ class Tomasulo:
 	def play(self):
 		print("RUM:")
 		self.recently_used_memory.print()
+		print()
+		print("Destiny buffer:")
+		self.destiny_buffer.print()
 		print()
 		print("CLOCKS:", self.clocks)
 		print("PC:", self.PC)

@@ -86,6 +86,13 @@ class instructions_unity(buffer):
 						self.top()[2] = str(self.Vk[self.start])
 
 					self.Tomasulo.ROB.push(copy_list(self.top()))
+
+					# if str(self.Tomasulo.PC) in self.Tomasulo.destiny_buffer.list:
+					# 	print("Jumping to destiny Jumping to destiny Jumping to destiny Jumping to destiny ")
+					# 	# input()
+					# 	if self.Tomasulo.destiny_buffer.list[str(self.Tomasulo.PC)][1] == "jump":
+					# 		self.Tomasulo.PC = int(self.Tomasulo.destiny_buffer.list[str(self.Tomasulo.PC)][0])
+
 					self.pop()
 
 			elif self.top() and (self.top()[0] == "ADD" or self.top()[0] == "ADDI" or self.top()[0] == "SUB" or self.top()[0] == "MUL"):
