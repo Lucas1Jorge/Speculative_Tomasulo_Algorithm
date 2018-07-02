@@ -1,3 +1,5 @@
+from functions import *
+
 from buffer import buffer
 
 class data_bus:
@@ -49,7 +51,7 @@ class data_bus:
 							or (self.receivers[i].name == "register_bank"):
 							self.receivers[i].push(info)
 					elif self.receivers[i].name == "register_bank" or self.receivers[i].name == "reorder_buffer":
-						self.receivers[i].push(info)
+						self.receivers[i].push(copy_list(info))
 					elif isinstance(self.receivers[i], buffer):
 						for pos in range(self.receivers[i].max_size):
 							if self.receivers[i].Qj[pos] == info[0]:

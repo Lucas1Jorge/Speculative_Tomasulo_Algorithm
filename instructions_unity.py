@@ -92,6 +92,11 @@ class instructions_unity(buffer):
 					# 	# input()
 					# 	if self.Tomasulo.destiny_buffer.list[str(self.Tomasulo.PC)][1] == "jump":
 					# 		self.Tomasulo.PC = int(self.Tomasulo.destiny_buffer.list[str(self.Tomasulo.PC)][0])
+					# 		ROB = self.Tomasulo.ROB
+					# 		if ROB.list[(ROB.end - 1) % ROB.max_size] and ROB.list[(ROB.end - 1) % ROB.max_size][0] == self.top()[0]:
+					# 			# ROB.jumped[(ROB.start - 1) % ROB.list.max] = "jump"
+					# 			ROB.jump[(ROB.end - 1) % ROB.max_size] = "jump"
+					# 			pass
 
 					self.pop()
 
@@ -159,22 +164,26 @@ class instructions_unity(buffer):
 						if len(register_bank.registers[int(self.top()[1])].Qi) == 0:
 							self.Vj[self.start] = int(register_bank.registers[int(self.top()[1])].Vi)
 							self.Qj[self.start] = ""
-						elif len(self.Qk[self.start]) == 0 and register_bank.registers[int(self.top()[1])].Qi != self.top()[0]:
+						elif len(self.Qj[self.start]) == 0 and register_bank.registers[int(self.top()[1])].Qi != self.top()[0]:
 							self.Qj[self.start] = register_bank.registers[int(self.top()[1])].Qi
 					else:
 						h = int(self.Tomasulo.ROB.RS_reorder[int(self.top()[1])])
 						if self.Tomasulo.ROB.Ready(h):
-							self.Vk[self.start] = self.Tomasulo.ROB.Value(h)
-							self.Qk[self.start] = ""
+							self.Vj[self.start] = self.Tomasulo.ROB.Value(h)
+							self.Qj[self.start] = ""
 						else:
-							self.Qk[self.start] = self.Tomasulo.ROB.list[h][0]
+							self.Qj[self.start] = self.Tomasulo.ROB.list[h][0]
 
 				if self.top()[0] == "SW":
-					if len(self.Qj[self.start]) == 0: self.top()[1] = str(self.Vj[self.start])
-					else: self.top()[1] = str(self.Qj[self.start])
+					if len(self.Qj[self.start]) == 0:
+						self.top()[1] = str(self.Vj[self.start])
+					else:
+						self.top()[1] = str(self.Qj[self.start])
 
-				if len(self.Qk[self.start]) == 0: self.top()[3] = str(self.Vk[self.start])
-				else: self.top()[3] = str(self.Qk[self.start])
+				if len(self.Qk[self.start]) == 0:
+					self.top()[3] = str(self.Vk[self.start])
+				else:
+					self.top()[3] = str(self.Qk[self.start])
 				for i in range(len(self.list_data_bus)):
 					info = copy_list(self.top())
 					self.list_data_bus[i].send(info)

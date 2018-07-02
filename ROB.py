@@ -10,10 +10,11 @@ class ROB(buffer):
 		self.RS_reorder = [""] * 32
 		self.Tomasulo = Tomasulo
 		self.PC = [""] * max_size
+		self.jump = [""] * max_size
 
 	def print(self):
 		for i in range(self.max_size):
-			print(self.ID[i], self.name, self.busy[i], self.list[i], self.state[i], self.destiny[i], self.value[i], self.size, "PC:", self.PC[i])
+			print(self.ID[i], self.name, self.busy[i], self.list[i], self.state[i], self.destiny[i], self.value[i], self.size, "PC:", self.PC[i], "jump:", self.jump[i])
 
 	def push(self, info):
 		if not self.full():
@@ -83,6 +84,7 @@ class ROB(buffer):
 			self.state[self.start] = ""
 			self.value[self.start] = ""
 			self.PC[self.start] = ""
+			self.jump[self.start] = ""
 			self.ready[self.start] = False
 			if self.destiny[self.start]:
 				if int(self.RS_reorder[int(self.destiny[self.start])]) == int(self.start):
@@ -113,9 +115,10 @@ class ROB(buffer):
 						jumping = "jump"
 
 				if jumping == "jump":
-					if not str(self.PC[self.start]) in self.Tomasulo.destiny_buffer.list or \
-					jumping != self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][1] or \
-					self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][0] != PC:
+					# if not str(self.PC[self.start]) in self.Tomasulo.destiny_buffer.list or \
+					# jumping != self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][1] or \
+					# int(self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][0]) != PC:
+					if self.jump[self.start] != "jump" or True:
 						self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])] = [str(PC), "jump"]
 						self.Tomasulo.PC = PC
 						for i in range(self.max_size):
@@ -125,18 +128,21 @@ class ROB(buffer):
 							self.destiny[i] = ""
 							self.value[i] = ""
 							self.PC[i] = ""
+							self.jump[i] = ""
 							self.start = 0
 							self.size = 0
 						for i in range(32):
 							self.RS_Busy[i] = False
 							self.RS_reorder[i] = ""
 				# elif jumping == "not":
-				# 	if str(self.PC[self.start]) in self.Tomasulo.destiny_buffer.list and \
-				# 	jumping != self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][1]:
-				# 		print(jumping)
-				# 		print(self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][1])
+				# 	# if (str(self.PC[self.start]) in self.Tomasulo.destiny_buffer.list and \
+				# 	# jumping != self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][1]):
+				# 	if self.jump[self.start] == "jump":
+				# 		# print(jumping)
+				# 		# print(self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][1])
 				# 		self.Tomasulo.PC = int(self.PC[self.start])
 				# 		del self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])]
+				# 		# self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])] = [str(self.PC[self.start]), "not"]
 				# 		for i in range(self.max_size):
 				# 			self.busy[i] = False
 				# 			self.list[i].clear()
@@ -144,6 +150,7 @@ class ROB(buffer):
 				# 			self.destiny[i] = ""
 				# 			self.value[i] = ""
 				# 			self.PC[i] = ""
+				# 			self.jump[i] = ""
 				# 			self.start = 0
 				# 			self.size = 0
 				# 		for i in range(32):
