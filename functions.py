@@ -62,6 +62,8 @@ def read_assembly(Dict, instruction):
 
 	return ans
 
+def not_over(PC):
+	return int(PC) < 136
 
 def update_buffer(buffer, info):
 	for i in range(buffer.max_size):

@@ -693,7 +693,8 @@ class Tomasulo:
 		print("# of concluded instructions:", self.concluded_instructions)
 		self.CPI = 0
 		if self.concluded_instructions != 0:
-			self.CPI = round(self.clocks/self.concluded_instructions, 3)
+			# self.CPI = round(self.clocks/self.concluded_instructions, 3)
+			self.CPI = self.clocks/self.concluded_instructions
 			print("CPI:", self.CPI)
 		self.clocks += 1
 

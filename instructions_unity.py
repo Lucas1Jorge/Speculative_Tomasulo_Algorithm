@@ -1,4 +1,5 @@
 from buffer import *
+from functions import *
 
 class instructions_unity(buffer):
 	def __init__(self, name, max_size, list_data_bus, Tomasulo):
@@ -86,19 +87,19 @@ class instructions_unity(buffer):
 						self.top()[2] = self.Qk[self.start]
 					else:
 						self.top()[2] = str(self.Vk[self.start])
-
+					
 					self.Tomasulo.ROB.push(copy_list(self.top()))
 
-					if str(self.Tomasulo.PC) in self.Tomasulo.destiny_buffer.list:
-						print("Jumping to destiny Jumping to destiny Jumping to destiny Jumping to destiny ")
-						# input()
-						if self.Tomasulo.destiny_buffer.list[str(self.Tomasulo.PC)][1] == "jump":
-							self.Tomasulo.PC = int(self.Tomasulo.destiny_buffer.list[str(self.Tomasulo.PC)][0])
-							ROB = self.Tomasulo.ROB
-							if ROB.list[(ROB.end - 1) % ROB.max_size] and ROB.list[(ROB.end - 1) % ROB.max_size][0] == self.top()[0]:
-								# ROB.jumped[(ROB.start - 1) % ROB.list.max] = "jump"
-								ROB.jump[(ROB.end - 1) % ROB.max_size] = "jump"
-								pass
+					# if str(self.Tomasulo.PC) in self.Tomasulo.destiny_buffer.list and self.Tomasulo.destiny_buffer.list[str(self.Tomasulo.PC)][1] == "jump":
+					# 	if self.Tomasulo.destiny_buffer.list[str(self.Tomasulo.PC)][1] == "jump":
+					# 		self.Tomasulo.PC = int(self.Tomasulo.destiny_buffer.list[str(self.Tomasulo.PC)][0])
+
+					if str(self.Tomasulo.PC) in self.Tomasulo.destiny_buffer.list and not_over(int(self.Tomasulo.PC)):
+						self.Tomasulo.PC = int(self.Tomasulo.destiny_buffer.list[str(self.Tomasulo.PC)])
+						# ROB = self.Tomasulo.ROB
+						# if ROB.list[(ROB.end - 1) % ROB.max_size] and ROB.list[(ROB.end - 1) % ROB.max_size][0] == self.top()[0]:
+						# 	ROB.jump[(ROB.end - 1) % ROB.max_size] = "jump"
+						# 	pass
 
 					self.pop()
 

@@ -17,11 +17,15 @@ class ROB(buffer):
 			print(self.ID[i], self.name, self.busy[i], self.list[i], self.state[i], self.destiny[i], self.value[i], self.size, "PC:", self.PC[i], "jump:", self.jump[i])
 
 	def push(self, info):
+		if self.full():
+			exit()
 		if not self.full():
 			if info[0] == "BEQ" or info[0] == "BLE" or info[0] == "BNE":
 				while len(self.list[self.end]) > 0: self.end = (self.end + 1) % self.max_size
 				self.list[self.end] = info
 				self.PC[self.end] = str(self.Tomasulo.PC)
+				if str(self.Tomasulo.PC) in self.Tomasulo.destiny_buffer.list and not_over(int(self.Tomasulo.PC)):
+					self.jump[self.end] = "jump"
 
 				self.end = (self.end + 1) % self.max_size
 				self.size += 1
@@ -78,7 +82,7 @@ class ROB(buffer):
 			return None
 		if not str.isnumeric(self.list[pos][-1]):
 			return None
-		return self.list[pos][-1]
+		return int(self.list[pos][-1])
 
 	def pop(self):
 		if self.size > 0:
@@ -118,6 +122,9 @@ class ROB(buffer):
 						PC = int(self.top()[3])
 						jumping = "jump"
 
+				start = self.start
+				self_PC = self.PC[start]
+				jump = self.jump[start]
 				if jumping == "jump" and self.jump[self.start] != "jump" or \
 					jumping == "not" and self.jump[self.start] == "jump":
 					for i in range(self.max_size):
@@ -157,19 +164,31 @@ class ROB(buffer):
 					# if not str(self.PC[self.start]) in self.Tomasulo.destiny_buffer.list or \
 					# jumping != self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][1] or \
 					# int(self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][0]) != PC:
-					if self.jump[self.start] != "jump":
-						self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])] = [str(PC), "jump"]
+					# if self.jump[self.start] != "jump":
+					# 	self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])] = [str(PC), "jump"]
+					# 	self.Tomasulo.PC = PC
+					# if self.jump[start] != "jump":
+					if jump != "jump":
+						# self.Tomasulo.destiny_buffer.list[str(self.PC[start])] = str(PC)
+						self.Tomasulo.destiny_buffer.list[str(self_PC)] = str(PC)
 						self.Tomasulo.PC = PC
 
 				elif jumping == "not":
 					# if (str(self.PC[self.start]) in self.Tomasulo.destiny_buffer.list and \
 					# jumping != self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][1]):
-					if self.jump[self.start] == "jump":
+					# if self.jump[self.start] == "jump":
+					# 	# print(jumping)
+					# 	# print(self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][1])
+					# 	self.Tomasulo.PC = int(self.PC[self.start])
+					# 	# del self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])]
+					# 	self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])] = [str(self.PC[self.start]), "not"]
+					if jump == "jump":
+						# input()
 						# print(jumping)
 						# print(self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][1])
-						self.Tomasulo.PC = int(self.PC[self.start])
-						# del self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])]
-						self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])] = [str(self.PC[self.start]), "not"]
+						self.Tomasulo.PC = int(self_PC)
+						del self.Tomasulo.destiny_buffer.list[str(self_PC)]
+						# self.Tomasulo.destiny_buffer.list[str(self_PC)] = [str(self_PC), "not"]
 
 				self.pop()
 

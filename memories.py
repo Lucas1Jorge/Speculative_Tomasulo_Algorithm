@@ -65,7 +65,7 @@ class destiny_buffer():
 		# for key, value in self.list:
 		# 	print("PC:", key, "destiny", value)
 		for key in self.list.keys():
-			print("PC:", key, "destiny:", self.list[key][0], "prediction:", self.list[key][1])
+			print("PC:", key, "destiny:", self.list[key])
 
 	def push(PC, destiny, prediction):
 		self.list[str(PC)] = [destiny, prediction]

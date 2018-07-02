@@ -55,14 +55,15 @@ class buffer:
 
 	def clear(self, pos):
 		ans = copy_list(self.list[pos])
-		self.busy[pos] = False
-		self.list[pos].clear()
-		self.Qj[pos] = ""
-		self.Qk[pos] = ""
-		self.Vj[pos] = ""
-		self.Vk[pos] = ""
-		self.state[pos] = ""
-		self.size -= 1
+		if len(self.list[pos]) > 0:
+			self.busy[pos] = False
+			self.list[pos].clear()
+			self.Qj[pos] = ""
+			self.Qk[pos] = ""
+			self.Vj[pos] = ""
+			self.Vk[pos] = ""
+			self.state[pos] = ""
+			self.size -= 1
 		return ans
 
 	def top(self):
