@@ -45,19 +45,23 @@ class ROB(buffer):
 
 			elif len(info) > 0:
 				found = False
+				ID = ""
 				for i in range(self.max_size):
 					if len(self.list[i]) > 0:
 						if self.list[i][0] == info[0] and self.list[i][-1] == "mark":
 							self.list[i] = copy_list(info)
 							found = True
+							ID = self.ID[i]
 							self.state[i] = "Consolidating"
 							self.ready[i] = True
+							break
 
 				if found:
 					for i in range(self.max_size):
 						if len(self.list[i]) > 0:
 							for j in range(1, len(self.list[i])):
-								if self.list[i][j] == info[0]:
+								# if self.list[i][j] == info[0]:
+								if self.list[i][j] == ID:
 									self.list[i][j] = info[-1]
 								self.ready[i] = True
 
@@ -114,48 +118,58 @@ class ROB(buffer):
 						PC = int(self.top()[3])
 						jumping = "jump"
 
+				if jumping == "jump" and self.jump[self.start] != "jump" or \
+					jumping == "not" and self.jump[self.start] == "jump":
+					for i in range(self.max_size):
+						self.busy[i] = False
+						self.list[i].clear()
+						self.state[i] = ""
+						self.destiny[i] = ""
+						self.value[i] = ""
+						self.PC[i] = ""
+						self.jump[i] = ""
+						self.start = 0
+						self.size = 0
+					for i in range(32):
+						self.RS_Busy[i] = False
+						self.RS_reorder[i] = ""
+
+					for i in range(self.Tomasulo.instructions_unity.max_size):
+						if len(self.Tomasulo.instructions_unity.list[i]) > 0:
+							self.Tomasulo.instructions_unity.clear(i)
+					for i in range(self.Tomasulo.load_store.max_size):
+						for j in range(1,4):
+							if self.Tomasulo.load_store.list[i] and self.Tomasulo.load_store.list[i][j][0] == "R":
+								self.Tomasulo.load_store.clear(i)
+								print("Cleaned load_store")
+					for i in range(self.Tomasulo.add_sub.max_size):
+						for j in range(1,4):
+							if self.Tomasulo.add_sub.list[i] and self.Tomasulo.add_sub.list[i][j][0] == "R":
+								self.Tomasulo.add_sub.clear(i)
+								print("Cleaned add_sub")
+					for i in range(self.Tomasulo.mult.max_size):
+						for j in range(1,4):
+							if self.Tomasulo.mult.list[i] and self.Tomasulo.mult.list[i][j][0] == "R":
+								self.Tomasulo.mult.clear(i)
+								print("Cleaned mult")
+
 				if jumping == "jump":
 					# if not str(self.PC[self.start]) in self.Tomasulo.destiny_buffer.list or \
 					# jumping != self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][1] or \
 					# int(self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][0]) != PC:
-					if self.jump[self.start] != "jump" or True:
+					if self.jump[self.start] != "jump":
 						self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])] = [str(PC), "jump"]
 						self.Tomasulo.PC = PC
-						for i in range(self.max_size):
-							self.busy[i] = False
-							self.list[i].clear()
-							self.state[i] = ""
-							self.destiny[i] = ""
-							self.value[i] = ""
-							self.PC[i] = ""
-							self.jump[i] = ""
-							self.start = 0
-							self.size = 0
-						for i in range(32):
-							self.RS_Busy[i] = False
-							self.RS_reorder[i] = ""
-				# elif jumping == "not":
-				# 	# if (str(self.PC[self.start]) in self.Tomasulo.destiny_buffer.list and \
-				# 	# jumping != self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][1]):
-				# 	if self.jump[self.start] == "jump":
-				# 		# print(jumping)
-				# 		# print(self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][1])
-				# 		self.Tomasulo.PC = int(self.PC[self.start])
-				# 		del self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])]
-				# 		# self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])] = [str(self.PC[self.start]), "not"]
-				# 		for i in range(self.max_size):
-				# 			self.busy[i] = False
-				# 			self.list[i].clear()
-				# 			self.state[i] = ""
-				# 			self.destiny[i] = ""
-				# 			self.value[i] = ""
-				# 			self.PC[i] = ""
-				# 			self.jump[i] = ""
-				# 			self.start = 0
-				# 			self.size = 0
-				# 		for i in range(32):
-				# 			self.RS_Busy[i] = False
-				# 			self.RS_reorder[i] = ""
+
+				elif jumping == "not":
+					# if (str(self.PC[self.start]) in self.Tomasulo.destiny_buffer.list and \
+					# jumping != self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][1]):
+					if self.jump[self.start] == "jump":
+						# print(jumping)
+						# print(self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])][1])
+						self.Tomasulo.PC = int(self.PC[self.start])
+						# del self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])]
+						self.Tomasulo.destiny_buffer.list[str(self.PC[self.start])] = [str(self.PC[self.start]), "not"]
 
 				self.pop()
 
@@ -183,8 +197,9 @@ class ROB(buffer):
 				
 				for i in range(self.Tomasulo.load_store.max_size):
 					for j in range(1,4):
-						if self.Tomasulo.load_store.list[i] and self.Tomasulo.load_store.list[i][j] == instruction[0]:
-							self.Tomasulo.load_store.list[i][j] = instruction[-1]
+						# if self.Tomasulo.load_store.list[i] and self.Tomasulo.load_store.list[i][j] == instruction[0]:
+						if self.Tomasulo.load_store.list[i] and self.Tomasulo.load_store.list[i][j] == self.ID[self.start]:
+							self.Tomasulo.load_store.list[i][j] = str(instruction[-1])
 							if j == 1 or j == 2:
 								self.Tomasulo.load_store.Vj[i] = instruction[-1]
 								self.Tomasulo.load_store.Qj[i] = ""
@@ -193,8 +208,9 @@ class ROB(buffer):
 								self.Tomasulo.load_store.Qk[i] = ""
 				for i in range(self.Tomasulo.add_sub.max_size):
 					for j in range(1,4):
-						if self.Tomasulo.add_sub.list[i] and self.Tomasulo.add_sub.list[i][j] == instruction[0]:
-							self.Tomasulo.add_sub.list[i][j] = instruction[-1]
+						# if self.Tomasulo.add_sub.list[i] and self.Tomasulo.add_sub.list[i][j] == instruction[0]:
+						if self.Tomasulo.add_sub.list[i] and self.Tomasulo.add_sub.list[i][j] == self.ID[self.start]:
+							self.Tomasulo.add_sub.list[i][j] = str(instruction[-1])
 							if j == 1 or j == 2:
 								self.Tomasulo.add_sub.Vj[i] = instruction[-1]
 								self.Tomasulo.add_sub.Qj[i] = ""
@@ -203,8 +219,9 @@ class ROB(buffer):
 								self.Tomasulo.add_sub.Qk[i] = ""
 				for i in range(self.Tomasulo.mult.max_size):
 					for j in range(1,4):
-						if self.Tomasulo.mult.list[i] and self.Tomasulo.mult.list[i][j] == instruction[0]:
-							self.Tomasulo.mult.list[i][j] = instruction[-1]
+						# if self.Tomasulo.mult.list[i] and self.Tomasulo.mult.list[i][j] == instruction[0]:
+						if self.Tomasulo.mult.list[i] and self.Tomasulo.mult.list[i][j] == self.ID[self.start]:
+							self.Tomasulo.mult.list[i][j] = str(instruction[-1])
 							if j == 1 or j == 2:
 								self.Tomasulo.mult.Vj[i] = instruction[-1]
 								self.Tomasulo.mult.Qj[i] = ""

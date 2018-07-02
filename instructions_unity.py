@@ -46,7 +46,8 @@ class instructions_unity(buffer):
 						self.Vj[self.start] = self.Tomasulo.ROB.Value(h)
 						self.Qj[self.start] = ""
 					else:
-						self.Qj[self.start] = self.Tomasulo.ROB.list[h][0]
+						# self.Qj[self.start] = self.Tomasulo.ROB.list[h][0]
+						self.Qj[self.start] = self.Tomasulo.ROB.ID[h]
 
 				if not self.Tomasulo.ROB.RS_Busy[int(self.top()[2])]:
 					if len(register_bank.registers[int(self.top()[2])].Qi) == 0:
@@ -57,10 +58,11 @@ class instructions_unity(buffer):
 				else:
 					h = int(self.Tomasulo.ROB.RS_reorder[int(self.top()[2])])
 					if self.Tomasulo.ROB.Ready(h):
-						self.Vj[self.start] = self.Tomasulo.ROB.Value(h)
-						self.Qj[self.start] = ""
+						self.Vk[self.start] = self.Tomasulo.ROB.Value(h)
+						self.Qk[self.start] = ""
 					else:
-						self.Qj[self.start] = self.Tomasulo.ROB.list[h][0]
+						# self.Qk[self.start] = self.Tomasulo.ROB.list[h][0]
+						self.Qk[self.start] = self.Tomasulo.ROB.ID[h]
 
 				if len(self.Qj[self.start]) == 0 and len(self.Qk[self.start]) == 0:
 					print("Vj:", self.Vj[self.start], "Vk", self.Vk[self.start], "Qj:", self.Qj[self.start], "Qk:", self.Qk[self.start])
@@ -87,16 +89,16 @@ class instructions_unity(buffer):
 
 					self.Tomasulo.ROB.push(copy_list(self.top()))
 
-					# if str(self.Tomasulo.PC) in self.Tomasulo.destiny_buffer.list:
-					# 	print("Jumping to destiny Jumping to destiny Jumping to destiny Jumping to destiny ")
-					# 	# input()
-					# 	if self.Tomasulo.destiny_buffer.list[str(self.Tomasulo.PC)][1] == "jump":
-					# 		self.Tomasulo.PC = int(self.Tomasulo.destiny_buffer.list[str(self.Tomasulo.PC)][0])
-					# 		ROB = self.Tomasulo.ROB
-					# 		if ROB.list[(ROB.end - 1) % ROB.max_size] and ROB.list[(ROB.end - 1) % ROB.max_size][0] == self.top()[0]:
-					# 			# ROB.jumped[(ROB.start - 1) % ROB.list.max] = "jump"
-					# 			ROB.jump[(ROB.end - 1) % ROB.max_size] = "jump"
-					# 			pass
+					if str(self.Tomasulo.PC) in self.Tomasulo.destiny_buffer.list:
+						print("Jumping to destiny Jumping to destiny Jumping to destiny Jumping to destiny ")
+						# input()
+						if self.Tomasulo.destiny_buffer.list[str(self.Tomasulo.PC)][1] == "jump":
+							self.Tomasulo.PC = int(self.Tomasulo.destiny_buffer.list[str(self.Tomasulo.PC)][0])
+							ROB = self.Tomasulo.ROB
+							if ROB.list[(ROB.end - 1) % ROB.max_size] and ROB.list[(ROB.end - 1) % ROB.max_size][0] == self.top()[0]:
+								# ROB.jumped[(ROB.start - 1) % ROB.list.max] = "jump"
+								ROB.jump[(ROB.end - 1) % ROB.max_size] = "jump"
+								pass
 
 					self.pop()
 
@@ -113,7 +115,8 @@ class instructions_unity(buffer):
 						self.Vj[self.start] = self.Tomasulo.ROB.Value(h)
 						self.Qj[self.start] = ""
 					else:
-						self.Qj[self.start] = self.Tomasulo.ROB.list[h][0]
+						# self.Qj[self.start] = self.Tomasulo.ROB.list[h][0]
+						self.Qj[self.start] = self.Tomasulo.ROB.ID[h]
 
 				if self.top()[0] == "ADD" or self.top()[0] == "SUB" or self.top()[0] == "MUL" or self.top()[0] == "LW" or self.top()[0] == "SW":
 					if not self.Tomasulo.ROB.RS_Busy[int(self.top()[3])]:
@@ -128,7 +131,8 @@ class instructions_unity(buffer):
 							self.Vk[self.start] = self.Tomasulo.ROB.Value(h)
 							self.Qk[self.start] = ""
 						else:
-							self.Qk[self.start] = self.Tomasulo.ROB.list[h][0]
+							# self.Qk[self.start] = self.Tomasulo.ROB.list[h][0]
+							self.Qk[self.start] = self.Tomasulo.ROB.ID[h]
 
 				elif self.top()[0] == "ADDI":
 					self.Vk[self.start] = int(self.top()[3])
@@ -157,7 +161,8 @@ class instructions_unity(buffer):
 						self.Vk[self.start] = self.Tomasulo.ROB.Value(h)
 						self.Qk[self.start] = ""
 					else:
-						self.Qk[self.start] = self.Tomasulo.ROB.list[h][0]
+						# self.Qk[self.start] = self.Tomasulo.ROB.list[h][0]
+						self.Qk[self.start] = self.Tomasulo.ROB.ID[h]
 
 				if self.top()[0] == "SW":
 					if not self.Tomasulo.ROB.RS_Busy[int(self.top()[1])]:
@@ -172,7 +177,8 @@ class instructions_unity(buffer):
 							self.Vj[self.start] = self.Tomasulo.ROB.Value(h)
 							self.Qj[self.start] = ""
 						else:
-							self.Qj[self.start] = self.Tomasulo.ROB.list[h][0]
+							# self.Qj[self.start] = self.Tomasulo.ROB.list[h][0]
+							self.Qj[self.start] = self.Tomasulo.ROB.ID[h]
 
 				if self.top()[0] == "SW":
 					if len(self.Qj[self.start]) == 0:

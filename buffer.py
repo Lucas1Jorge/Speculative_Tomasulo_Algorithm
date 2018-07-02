@@ -53,6 +53,18 @@ class buffer:
 			self.size -= 1
 			return ans
 
+	def clear(self, pos):
+		ans = copy_list(self.list[pos])
+		self.busy[pos] = False
+		self.list[pos].clear()
+		self.Qj[pos] = ""
+		self.Qk[pos] = ""
+		self.Vj[pos] = ""
+		self.Vk[pos] = ""
+		self.state[pos] = ""
+		self.size -= 1
+		return ans
+
 	def top(self):
 		if self.size > 0:
 			while not self.list[self.start]: self.start = (self.start + 1) % self.max_size
