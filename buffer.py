@@ -148,9 +148,14 @@ class load_store(buffer):
 				if self.top()[0] == "LW":
 					for i in range(Tomasulo.ROB.max_size):
 						if Tomasulo.ROB.list[i] and Tomasulo.ROB.list[i][0][0] == "S":
+							store = Tomasulo.ROB.list[i]
+							if (not str.isnumeric(store[2])) or not str.isnumeric(store[3]):
+								return
+							# elif int(store[2] + int)
 							# input()
-							if Tomasulo.ROB.Ready(i):
-								input()
+							for j in range(1, len(self.top())):
+								if self.top()[j] == store[0]:
+									return
 
 				self.executer.execute(self.top(), self.ID[self.start])
 				self.busy[self.start] = True

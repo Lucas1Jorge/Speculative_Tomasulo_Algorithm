@@ -660,13 +660,13 @@ class Tomasulo:
 		self.common_data_bus.add_receivers([self.register_bank])
 
 		self.loader = loader([self.common_data_bus])
-		self.load_store = load_store("load_store", 5, [self.common_data_bus], self.loader)
+		self.load_store = load_store("load_store", 10, [self.common_data_bus], self.loader)
 
 		self.multiplier = multiplier([self.common_data_bus])
-		self.mult = reservation_station("mult", 3, [self.common_data_bus], self.multiplier)
+		self.mult = reservation_station("mult", 5, [self.common_data_bus], self.multiplier)
 
 		self.adder = adder([self.common_data_bus])
-		self.add_sub = reservation_station("add_sub", 3, [self.common_data_bus], self.adder)
+		self.add_sub = reservation_station("add_sub", 5, [self.common_data_bus], self.adder)
 
 		self.common_data_bus.add_receivers([self.load_store, self.mult, self.add_sub])	
 
@@ -676,7 +676,7 @@ class Tomasulo:
 		self.operations_bus = data_bus("operations_bus")
 		self.operations_bus.add_receivers([self.mult, self.add_sub])
 
-		self.instructions_unity = instructions_unity("instructions_unity", 6, [self.load_store_bus, self.operations_bus])
+		self.instructions_unity = instructions_unity("instructions_unity", 10, [self.load_store_bus, self.operations_bus])
 
 		self.memory = [0] * 4000
 		self.clocks = 0

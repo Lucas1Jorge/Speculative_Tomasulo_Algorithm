@@ -1,4 +1,5 @@
 from buffer import *
+from functions import *
 
 class ROB(buffer):
 	def __init__(self, name, max_size, list_data_bus, Tomasulo):
@@ -102,6 +103,7 @@ class ROB(buffer):
 			self.destiny[self.start] = ""
 			self.start = (self.start + 1) % self.max_size
 			self.size -= 1
+
 			return ans
 
 	def clock(self, register_bank):
@@ -249,7 +251,8 @@ class ROB(buffer):
 								self.Tomasulo.mult.Qk[i] = ""
 
 				self.pop()
+				self.Tomasulo.concluded_instructions += 1
 
 
-				# global concluded_instructions
-				# Tomasulo.concluded_instructions += 1
+		while self.state[self.start] == "Consolidating":
+			self.clock(register_bank)

@@ -57,7 +57,7 @@ class executer:
 					self.pop()
 
 					# global concluded_instructions
-					self.Tomasulo.concluded_instructions += 1
+					# self.Tomasulo.concluded_instructions += 1
 
 
 class loader(executer):
@@ -101,7 +101,7 @@ class loader(executer):
 					self.pop()
 
 					# global concluded_instructions
-					self.Tomasulo.concluded_instructions += 1
+					# self.Tomasulo.concluded_instructions += 1
 
 
 class adder(executer):
